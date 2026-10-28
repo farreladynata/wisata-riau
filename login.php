@@ -1,13 +1,12 @@
 
 <?php
 session_start();
-
 require_once 'koneksi.php';
 
 if (isset($_SESSION['user_id'])) {
     header(
         'Location: ' .
-        ($_SESSION['role'] === 'admin' ? 'admin.php' : 'index.php')
+        (($_SESSION['role'] ?? '') === 'admin' ? 'admin.php' : 'index.php')
     );
     exit;
 }
@@ -49,10 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = $result->fetch_assoc();
         $stmt->close();
 
-        if (
-            $user &&
-            password_verify($password, $user['password'])
-        ) {
+        if ($user && password_verify($password, $user['password'])) {
             session_regenerate_id(true);
 
             $_SESSION['user_id'] = (int) $user['id'];
@@ -73,56 +69,164 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Login - Wisata Riau</title>
+    <meta name="theme-color" content="#ffffff">
+    <title>Login Admin | Wisata Riau</title>
+
+    <link rel="stylesheet" href="assets/login.css">
 </head>
 <body>
-    <h1>Login Wisata Riau</h1>
-    <p>Silakan masuk menggunakan akun kamu.</p>
+    <main class="login-page">
+        <section class="login-showcase">
+            <a class="brand" href="index.php">
+                <span class="brand-mark">W</span>
+                <span>Wisata<span class="brand-light">Riau</span></span>
+            </a>
 
-    <?php if ($error !== ''): ?>
-        <p role="alert">
-            <?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?>
-        </p>
-    <?php endif; ?>
+            <div class="showcase-content">
+                <span class="eyebrow">
+                    <span class="eyebrow-dot"></span>
+                    ADMINISTRATOR PORTAL
+                </span>
 
-    <form method="POST" action="login.php">
-        <input
-            type="hidden"
-            name="csrf_token"
-            value="<?= htmlspecialchars(
-                $_SESSION['csrf_token'],
-                ENT_QUOTES,
-                'UTF-8'
-            ) ?>"
-        >
+                <h1>Jelajahi keindahan,<br>
+                    <span>kelola potensi Riau.</span>
+                </h1>
 
-        <label for="email">Email</label><br>
-        <input
-            type="email"
-            id="email"
-            name="email"
-            autocomplete="username"
-            required
-        ><br><br>
+                <p>
+                    Satu tempat untuk mengelola destinasi wisata,
+                    informasi, dan kekayaan pariwisata Riau.
+                </p>
 
-        <label for="password">Password</label><br>
-        <input
-            type="password"
-            id="password"
-            name="password"
-            autocomplete="current-password"
-            required
-        ><br><br>
+                <div class="showcase-note">
+                    <span class="note-icon">✦</span>
+                    <span>Discover more. Experience Riau.</span>
+                </div>
+            </div>
 
-        <button type="submit">Login</button>
-    </form>
+            <div class="showcase-footer">
+                <span>Platform Pengelolaan Pariwisata</span>
+                <span>RIAU, INDONESIA</span>
+            </div>
+        </section>
 
-    <p><a href="index.php">Kembali ke beranda</a></p>
+        <section class="login-panel">
+            <div class="login-card">
+                <div class="mobile-brand">
+                    <span class="brand-mark">W</span>
+                    <span>Wisata<span class="brand-light">Riau</span></span>
+                </div>
+
+                <div class="login-heading">
+                    <span class="heading-icon">↗</span>
+                    <p class="form-eyebrow">SELAMAT DATANG KEMBALI</p>
+                    <h2>Masuk ke akunmu</h2>
+                    <p class="form-description">
+                        Masukkan informasi akun untuk melanjutkan.
+                    </p>
+                </div>
+
+                <?php if ($error !== ''): ?>
+                    <div class="alert-error" role="alert">
+                        <span aria-hidden="true">!</span>
+                        <?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?>
+                    </div>
+                <?php endif; ?>
+
+                <form action="login.php" method="POST" class="login-form">
+                    <input
+                        type="hidden"
+                        name="csrf_token"
+                        value="<?= htmlspecialchars(
+                            $_SESSION['csrf_token'],
+                            ENT_QUOTES,
+                            'UTF-8'
+                        ) ?>"
+                    >
+
+                    <div class="form-group">
+                        <label for="email">Alamat email</label>
+                        <div class="input-wrap">
+                            <span class="input-icon" aria-hidden="true">@</span>
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                placeholder="nama@email.com"
+                                autocomplete="username"
+                                value="<?= htmlspecialchars(
+                                    $_POST['email'] ?? '',
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ) ?>"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="input-wrap">
+                            <span class="input-icon" aria-hidden="true">⌑</span>
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                placeholder="Masukkan password"
+                                autocomplete="current-password"
+                                required
+                            >
+                            <button
+                                type="button"
+                                class="password-toggle"
+                                id="togglePassword"
+                                aria-label="Tampilkan password"
+                            >Lihat</button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="login-button">
+                        Masuk ke Dashboard
+                        <span aria-hidden="true">→</span>
+                    </button>
+                </form>
+
+                <div class="login-divider">
+                    <span></span>
+                    <small>WISATA RIAU ADMIN</small>
+                    <span></span>
+                </div>
+
+                <a href="index.php" class="back-link">
+                    <span aria-hidden="true">←</span>
+                    Kembali ke halaman utama
+                </a>
+
+                <p class="login-legal">
+                    Akses khusus untuk pengguna terdaftar.
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+
+        togglePassword.addEventListener('click', () => {
+            const isHidden = passwordInput.type === 'password';
+
+            passwordInput.type = isHidden ? 'text' : 'password';
+            togglePassword.textContent = isHidden ? 'Sembunyi' : 'Lihat';
+            togglePassword.setAttribute(
+                'aria-label',
+                isHidden ? 'Sembunyikan password' : 'Tampilkan password'
+            );
+        });
+    </script>
 </body>
 </html>

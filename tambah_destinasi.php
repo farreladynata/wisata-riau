@@ -231,172 +231,263 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#16834a">
     <title>Tambah Destinasi - Wisata Riau</title>
+    <link rel="stylesheet" href="assets/tambah-destinasi.css">
 </head>
 <body>
 
-    <h1>Tambah Destinasi Wisata</h1>
+    <header class="td-navbar">
+        <div class="td-navbar-inner">
+            <a href="index.php" class="td-brand">
+                <span class="td-brand-icon">🌿</span>
+                <span>Wisata Riau</span>
+            </a>
+            <span class="td-navbar-label">Panel Pengelolaan Destinasi</span>
+        </div>
+    </header>
 
-    <p>
-        <a href="destinasi.php">Kembali ke daftar destinasi</a>
-    </p>
+    <main class="td-container">
 
-    <?php if ($error !== ''): ?>
-        <p style="color: red;">
-            <?= e($error) ?>
-        </p>
-    <?php endif; ?>
+        <nav class="td-breadcrumb" aria-label="Breadcrumb">
+            <a href="admin.php">Dashboard</a>
+            <span>/</span>
+            <a href="destinasi.php">Destinasi</a>
+            <span>/</span>
+            <span>Tambah Destinasi</span>
+        </nav>
 
-    <?php if (count($kategoriList) === 0): ?>
+        <section class="td-heading">
+            <span class="td-eyebrow">✦ Kelola wisata</span>
+            <h1>Tambah Destinasi</h1>
+            <p>Lengkapi informasi destinasi wisata baru agar pengunjung dapat mengenalnya.</p>
+        </section>
 
-        <p>Belum ada kategori. Tambahkan kategori terlebih dahulu.</p>
+        <section class="td-card">
 
-    <?php else: ?>
+            <div class="td-card-header">
+                <div class="td-section-icon">📍</div>
+                <div>
+                    <h2>Informasi Destinasi</h2>
+                    <p>Kolom bertanda <span class="td-required">*</span> wajib diisi.</p>
+                </div>
+            </div>
 
-        <form method="POST" action="">
+            <?php if ($error !== ''): ?>
+                <div class="td-alert" role="alert" style="margin: 20px 28px 0;">
+                    <strong>Gagal menyimpan data</strong><br>
+                    <?= e($error) ?>
+                </div>
+            <?php endif; ?>
 
-            <input
-                type="hidden"
-                name="csrf_token"
-                value="<?= e($_SESSION['csrf_token'] ?? '') ?>"
-            >
+            <?php if (count($kategoriList) === 0): ?>
 
-            <p>
-                <label for="nama_wisata">Nama Wisata *</label><br>
-                <input
-                    type="text"
-                    id="nama_wisata"
-                    name="nama_wisata"
-                    maxlength="150"
-                    required
-                    value="<?= e($nama_wisata) ?>"
-                >
-            </p>
+                <div class="td-empty">
+                    <strong>Belum ada kategori wisata.</strong>
+                    <p>Tambahkan kategori terlebih dahulu sebelum membuat destinasi baru.</p>
+                </div>
 
-            <p>
-                <label for="id_kategori">Kategori *</label><br>
-                <select id="id_kategori" name="id_kategori" required>
-                    <option value="">-- Pilih Kategori --</option>
+            <?php else: ?>
 
-                    <?php foreach ($kategoriList as $kategori): ?>
-                        <option
-                            value="<?= (int) $kategori['id_kategori'] ?>"
-                            <?= (string) $kategori['id_kategori'] === $id_kategori ? 'selected' : '' ?>
-                        >
-                            <?= e($kategori['nama_kategori']) ?>
-                        </option>
-                    <?php endforeach; ?>
+                <form method="POST" action="" class="td-form">
 
-                </select>
-            </p>
+                    <input
+                        type="hidden"
+                        name="csrf_token"
+                        value="<?= e($_SESSION['csrf_token'] ?? '') ?>"
+                    >
 
-            <p>
-                <label for="deskripsi">Deskripsi</label><br>
-                <textarea
-                    id="deskripsi"
-                    name="deskripsi"
-                    rows="4"
-                ><?= e($deskripsi) ?></textarea>
-            </p>
+                    <section class="td-form-section">
+                        <h3 class="td-section-title">Informasi utama</h3>
 
-            <p>
-                <label for="alamat">Alamat</label><br>
-                <textarea
-                    id="alamat"
-                    name="alamat"
-                    rows="3"
-                ><?= e($alamat) ?></textarea>
-            </p>
+                        <div class="td-form-grid">
 
-            <p>
-                <label for="kabupaten_kota">Kabupaten/Kota</label><br>
-                <input
-                    type="text"
-                    id="kabupaten_kota"
-                    name="kabupaten_kota"
-                    maxlength="100"
-                    value="<?= e($kabupaten_kota) ?>"
-                >
-            </p>
+                            <div class="td-field td-field-full">
+                                <label for="nama_wisata">
+                                    Nama Destinasi <span class="td-required">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    id="nama_wisata"
+                                    name="nama_wisata"
+                                    maxlength="150"
+                                    placeholder="Contoh: Taman Wisata Alam Mayang"
+                                    required
+                                    value="<?= e($nama_wisata) ?>"
+                                >
+                            </div>
 
-            <p>
-                <label for="latitude">Latitude</label><br>
-                <input
-                    type="number"
-                    step="any"
-                    min="-90"
-                    max="90"
-                    id="latitude"
-                    name="latitude"
-                    value="<?= e($latitude) ?>"
-                >
-            </p>
+                            <div class="td-field td-field-full">
+                                <label for="id_kategori">
+                                    Kategori Wisata <span class="td-required">*</span>
+                                </label>
+                                <select id="id_kategori" name="id_kategori" required>
+                                    <option value="">-- Pilih kategori --</option>
+                                    <?php foreach ($kategoriList as $kategori): ?>
+                                        <option
+                                            value="<?= (int) $kategori['id_kategori'] ?>"
+                                            <?= (string) $kategori['id_kategori'] === $id_kategori ? 'selected' : '' ?>
+                                        >
+                                            <?= e($kategori['nama_kategori']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
 
-            <p>
-                <label for="longitude">Longitude</label><br>
-                <input
-                    type="number"
-                    step="any"
-                    min="-180"
-                    max="180"
-                    id="longitude"
-                    name="longitude"
-                    value="<?= e($longitude) ?>"
-                >
-            </p>
+                            <div class="td-field td-field-full">
+                                <label for="deskripsi">Deskripsi Destinasi</label>
+                                <textarea
+                                    id="deskripsi"
+                                    name="deskripsi"
+                                    placeholder="Ceritakan daya tarik dan hal menarik dari destinasi ini..."
+                                ><?= e($deskripsi) ?></textarea>
+                                <small class="td-help">
+                                    Jelaskan daya tarik destinasi agar pengunjung mendapat gambaran yang jelas.
+                                </small>
+                            </div>
 
-            <p>
-                <label for="jam_operasional">Jam Operasional</label><br>
-                <input
-                    type="text"
-                    id="jam_operasional"
-                    name="jam_operasional"
-                    maxlength="150"
-                    placeholder="Contoh: Setiap hari, 08.00-17.00"
-                    value="<?= e($jam_operasional) ?>"
-                >
-            </p>
+                        </div>
+                    </section>
 
-            <p>
-                <label for="harga_tiket">Harga Tiket (Rp)</label><br>
-                <input
-                    type="number"
-                    id="harga_tiket"
-                    name="harga_tiket"
-                    min="0"
-                    max="9999999999.99"
-                    step="0.01"
-                    value="<?= e($harga_tiket) ?>"
-                >
-            </p>
+                    <section class="td-form-section">
+                        <h3 class="td-section-title">Lokasi dan akses</h3>
 
-            <p>
-                <label for="foto">Nama/path foto</label><br>
-                <input
-                    type="text"
-                    id="foto"
-                    name="foto"
-                    maxlength="255"
-                    placeholder="Contoh: uploads/pantai.jpg"
-                    value="<?= e($foto) ?>"
-                >
-                <br>
-                <small>
-                    Untuk sekarang masukkan nama atau path foto.
-                    Fitur upload gambar akan dibuat terpisah.
-                </small>
-            </p>
+                        <div class="td-form-grid">
 
-            <button type="submit">Simpan Destinasi</button>
+                            <div class="td-field td-field-full">
+                                <label for="alamat">Alamat Lengkap</label>
+                                <textarea
+                                    id="alamat"
+                                    name="alamat"
+                                    rows="3"
+                                    placeholder="Masukkan alamat atau petunjuk lokasi"
+                                ><?= e($alamat) ?></textarea>
+                            </div>
 
-        </form>
+                            <div class="td-field td-field-full">
+                                <label for="kabupaten_kota">Kabupaten / Kota</label>
+                                <input
+                                    type="text"
+                                    id="kabupaten_kota"
+                                    name="kabupaten_kota"
+                                    maxlength="100"
+                                    placeholder="Contoh: Pekanbaru"
+                                    value="<?= e($kabupaten_kota) ?>"
+                                >
+                            </div>
 
-    <?php endif; ?>
+                            <div class="td-field">
+                                <label for="latitude">Latitude</label>
+                                <input
+                                    type="number"
+                                    step="any"
+                                    min="-90"
+                                    max="90"
+                                    id="latitude"
+                                    name="latitude"
+                                    placeholder="Contoh: 0.5071"
+                                    value="<?= e($latitude) ?>"
+                                >
+                                <small class="td-help">Rentang -90 hingga 90.</small>
+                            </div>
+
+                            <div class="td-field">
+                                <label for="longitude">Longitude</label>
+                                <input
+                                    type="number"
+                                    step="any"
+                                    min="-180"
+                                    max="180"
+                                    id="longitude"
+                                    name="longitude"
+                                    placeholder="Contoh: 101.4478"
+                                    value="<?= e($longitude) ?>"
+                                >
+                                <small class="td-help">Rentang -180 hingga 180.</small>
+                            </div>
+
+                        </div>
+                    </section>
+
+                    <section class="td-form-section">
+                        <h3 class="td-section-title">Informasi kunjungan</h3>
+
+                        <div class="td-form-grid">
+
+                            <div class="td-field">
+                                <label for="jam_operasional">Jam Operasional</label>
+                                <input
+                                    type="text"
+                                    id="jam_operasional"
+                                    name="jam_operasional"
+                                    maxlength="150"
+                                    placeholder="Contoh: 08.00–17.00"
+                                    value="<?= e($jam_operasional) ?>"
+                                >
+                            </div>
+
+                            <div class="td-field">
+                                <label for="harga_tiket">Harga Tiket (Rp)</label>
+                                <input
+                                    type="number"
+                                    id="harga_tiket"
+                                    name="harga_tiket"
+                                    min="0"
+                                    max="9999999999.99"
+                                    step="0.01"
+                                    placeholder="0"
+                                    value="<?= e($harga_tiket) ?>"
+                                >
+                                <small class="td-help">
+                                    Isi 0 atau kosong jika tidak ada biaya tiket.
+                                </small>
+                            </div>
+
+                            <div class="td-field td-field-full">
+                                <label for="foto">Path Foto Destinasi</label>
+                                <input
+                                    type="text"
+                                    id="foto"
+                                    name="foto"
+                                    maxlength="255"
+                                    placeholder="Contoh: uploads/pantai.jpg"
+                                    value="<?= e($foto) ?>"
+                                >
+                                <small class="td-help">
+                                    Masukkan path foto yang sudah tersedia. Fitur upload foto belum termasuk dalam form ini.
+                                </small>
+                            </div>
+
+                        </div>
+                    </section>
+
+                    <div class="td-form-actions">
+                        <a href="destinasi.php" class="td-button td-button-secondary">
+                            ← Kembali
+                        </a>
+
+                        <button type="submit" class="td-button td-button-primary">
+                            ✓ Simpan Destinasi
+                        </button>
+                    </div>
+
+                </form>
+
+            <?php endif; ?>
+
+        </section>
+
+    </main>
+
+    <footer class="td-footer">
+        Wisata Riau · Sistem Informasi Destinasi Wisata
+    </footer>
 
 </body>
 </html>
