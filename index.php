@@ -62,9 +62,9 @@ $totalWisata = mysqli_num_rows($result);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta name="description" content="Jelajahi berbagai destinasi wisata menarik di Provinsi Riau. Temukan wisata alam, budaya, sejarah, dan destinasi favoritmu.">
+    <meta name="description" content="Jelajahi pesona alam, budaya Melayu, dan destinasi pilihan di Riau bersama Wisata Riau.">
 
-    <title>Wisata Riau — Temukan Destinasi Favoritmu</title>
+    <title>Wisata Riau — Jelajahi Pesona Bumi Lancang Kuning</title>
 
     
 <link rel="stylesheet" href="assets/style.css">
@@ -328,22 +328,84 @@ $totalWisata = mysqli_num_rows($result);
             </div>
         </section>
 
-        <!-- TENTANG -->
-        <section class="closing" id="tentang">
+        <!-- TENTANG WISATA RIAU -->
+        <section class="about-section" id="tentang">
             <div class="container">
-                <div class="closing-inner">
+                <div class="about-heading">
                     <div>
-                        <div class="eyebrow">Kenali Riau Lebih Dekat</div>
-                        <h2>Perjalananmu di Riau Dimulai di Sini.</h2>
-                        <p>
-                            Temukan inspirasi destinasi dan rencanakan
-                            perjalananmu menjelajahi pesona Riau.
-                        </p>
+                        <div class="eyebrow">Cerita di Balik Wisata Riau</div>
+                        <h2 class="about-title">
+                            Mengenal Riau,<br>
+                            <span>lebih dekat dan bermakna.</span>
+                        </h2>
+                    </div>
+                    <p class="about-intro">
+                        Setiap perjalanan punya cerita. Wisata Riau hadir untuk membantumu
+                        menemukan tempat-tempat menarik sekaligus mengenal kekayaan alam,
+                        budaya, dan identitas Melayu yang membuat Riau istimewa.
+                    </p>
+                </div>
+
+                <div class="about-story">
+                    <div class="about-image-wrap">
+                        <img
+                            src="https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=1200&q=85"
+                            alt="Pemandangan alam hijau yang menggambarkan keindahan alam Sumatra"
+                            loading="lazy"
+                        >
+                        <div class="about-image-caption">
+                            <span class="caption-mark">✦</span>
+                            <span>Jelajahi keindahan yang dekat dengan kita</span>
+                        </div>
                     </div>
 
-                    <a href="#destinasi" class="button">
-                        Temukan Wisata <span>→</span>
-                    </a>
+                    <div class="about-copy">
+                        <div class="about-number">01 <span>— Tentang kami</span></div>
+                        <h3>Bukan sekadar tempat untuk dikunjungi.</h3>
+                        <p>
+                            Riau menyimpan banyak cerita—dari bentang alam yang menenangkan
+                            hingga tradisi Melayu yang terus hidup dalam keseharian masyarakatnya.
+                            Melalui Wisata Riau, kami ingin membuat cerita-cerita itu lebih mudah
+                            ditemukan oleh siapa pun yang ingin menjelajah.
+                        </p>
+                        <p>
+                            Kami merangkum informasi destinasi dalam satu tempat agar kamu bisa
+                            mengenal pilihan wisata, melihat lokasi, memahami kategori, dan
+                            mempersiapkan perjalanan dengan lebih praktis.
+                        </p>
+                        <a href="#destinasi" class="about-link">
+                            Mulai jelajahi Riau <span aria-hidden="true">↗</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="about-values" aria-label="Nilai Wisata Riau">
+                    <article class="about-value">
+                        <span class="about-value-index">01</span>
+                        <div class="about-value-icon" aria-hidden="true">🌿</div>
+                        <h3>Mengangkat Pesona Lokal</h3>
+                        <p>Mengenalkan beragam destinasi dan daya tarik yang ada di Riau.</p>
+                    </article>
+
+                    <article class="about-value">
+                        <span class="about-value-index">02</span>
+                        <div class="about-value-icon" aria-hidden="true">⌖</div>
+                        <h3>Informasi Lebih Praktis</h3>
+                        <p>Membantu pengunjung menemukan informasi dasar sebelum berangkat.</p>
+                    </article>
+
+                    <article class="about-value">
+                        <span class="about-value-index">03</span>
+                        <div class="about-value-icon" aria-hidden="true">✧</div>
+                        <h3>Menjaga Cerita Tetap Hidup</h3>
+                        <p>Mengajak lebih banyak orang mengenal alam dan budaya daerah sendiri.</p>
+                    </article>
+                </div>
+
+                <div class="about-quote">
+                    <span class="about-quote-mark">“</span>
+                    <p>Perjalanan terbaik bukan hanya tentang tempat yang kita datangi, tetapi juga cerita yang kita bawa pulang.</p>
+                    <span class="about-quote-label">Semangat Wisata Riau</span>
                 </div>
             </div>
         </section>

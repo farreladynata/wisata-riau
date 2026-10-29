@@ -36,6 +36,7 @@ $longitude = '';
 $jam_operasional = '';
 $harga_tiket = '';
 $foto = '';
+$link_maps = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
@@ -62,6 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $jam_operasional = trim($_POST['jam_operasional'] ?? '');
     $harga_tiket = trim($_POST['harga_tiket'] ?? '');
     $foto = trim($_POST['foto'] ?? '');
+    $link_maps = trim($_POST['link_maps'] ?? '');
 
     // Validasi nama
     if (
@@ -187,6 +189,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ? null
             : $foto;
 
+        $linkMapsValue = $link_maps === ''
+            ? null
+            : $link_maps;
+
         $stmt = $conn->prepare(
             "INSERT INTO destinasi_wisata (
                 id_kategori,
@@ -198,12 +204,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 longitude,
                 jam_operasional,
                 harga_tiket,
-                foto
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                foto,
+                link_maps
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         );
 
         $stmt->bind_param(
-            'issssddssd',
+            'issssddsdss',
             $kategoriId,
             $nama_wisata,
             $deskripsiValue,
@@ -213,7 +220,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $lon,
             $jamValue,
             $harga,
-            $fotoValue
+            $fotoValue,
+            $linkMapsValue
         );
 
         if ($stmt->execute()) {
@@ -410,6 +418,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     value="<?= e($longitude) ?>"
                                 >
                                 <small class="td-help">Rentang -180 hingga 180.</small>
+                            </div>
+
+                            <div class="td-field td-field-full">
+                                <label for="link_maps">Link Lokasi Google Maps</label>
+                                <input
+                                    type="url"
+                                    id="link_maps"
+                                    name="link_maps"
+                                    maxlength="2000"
+                                    placeholder="https://maps.app.goo.gl/..."
+                                    value="<?= e($link_maps) ?>"
+                                >
+                                <small class="td-help">
+                                    Opsional. Buka Google Maps, pilih lokasi wisata, klik Bagikan lalu Salin link dan tempel di sini.
+                                </small>
                             </div>
 
                         </div>

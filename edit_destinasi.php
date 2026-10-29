@@ -1,4 +1,3 @@
-```php
 <?php
 require_once 'auth.php';
 require_once 'koneksi.php';
@@ -86,6 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $jam = trim($_POST['jam_operasional'] ?? '');
         $harga = trim($_POST['harga_tiket'] ?? '');
         $foto = trim($_POST['foto'] ?? '');
+        $link_maps = trim($_POST['link_maps'] ?? '');
 
         // Pertahankan input jika validasi gagal
         $data['nama_wisata'] = $nama;
@@ -98,6 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $data['jam_operasional'] = $jam;
         $data['harga_tiket'] = $harga;
         $data['foto'] = $foto;
+        $data['link_maps'] = $link_maps;
 
         $kategoriValid = false;
 
@@ -120,6 +121,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Jam operasional maksimal 150 karakter.';
         } elseif (strlen($foto) > 255) {
             $error = 'Path foto maksimal 255 karakter.';
+        } elseif (strlen($link_maps) > 2000) {
+            $error = 'Link Google Maps maksimal 2000 karakter.';
+        } elseif (
+            $link_maps !== '' &&
+            (
+                !filter_var($link_maps, FILTER_VALIDATE_URL) ||
+                !in_array(
+                    strtolower((string) parse_url($link_maps, PHP_URL_SCHEME)),
+                    ['http', 'https'],
+                    true
+                ) ||
+                !in_array(
+                    strtolower((string) parse_url($link_maps, PHP_URL_HOST)),
+                    ['maps.app.goo.gl', 'goo.gl', 'google.com', 'www.google.com',
+                     'maps.google.com', 'maps.google.co.id', 'www.google.co.id']
+                    ,
+                    true
+                )
+            )
+        ) {
+            $error = 'Link harus berupa URL Google Maps yang valid.';
         } elseif (
             !is_numeric($harga) ||
             (float) $harga < 0 ||
@@ -167,7 +189,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                      longitude = ?,
                      jam_operasional = ?,
                      harga_tiket = ?,
-                     foto = ?
+                     foto = ?,
+                     link_maps = ?
                  WHERE id_wisata = ?"
             );
 
@@ -176,7 +199,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $error = 'Gagal menyiapkan perubahan data.';
             } else {
                 $stmt->bind_param(
-                    'issssddsssi',
+                    'issssddssssi',
                     $kategoriId,
                     $nama,
                     $deskripsi,
@@ -187,6 +210,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $jam,
                     $hargaDB,
                     $foto,
+                    $link_maps,
                     $id
                 );
 
@@ -415,6 +439,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 placeholder="Contoh: uploads/pantai.jpg"
                 value="<?= e($data['foto'] ?? '') ?>"
             >
+
+            <label for="link_maps">Link Lokasi Google Maps (opsional)</label>
+            <input
+                id="link_maps"
+                name="link_maps"
+                type="url"
+                maxlength="2000"
+                placeholder="https://maps.app.goo.gl/..."
+                value="<?= e($data['link_maps'] ?? '') ?>"
+            >
+            <small>Salin link dari Google Maps lalu tempel di sini. Link akan ditampilkan sebagai tombol lokasi untuk pengunjung.</small>
 
             <div class="buttons">
                 <button type="submit">Simpan Perubahan</button>
