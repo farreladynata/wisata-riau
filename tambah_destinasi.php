@@ -11,6 +11,61 @@ function e($value) {
     );
 }
 
+/**
+ * Upload gambar destinasi dengan validasi MIME dan ukuran.
+ * Mengembalikan path relatif (uploads/nama-file.ext) atau null jika tidak ada file.
+ */
+function uploadFotoDestinasi(string &$error): ?string
+{
+    if (!isset($_FILES['foto_file']) || $_FILES['foto_file']['error'] === UPLOAD_ERR_NO_FILE) {
+        return null;
+    }
+
+    $file = $_FILES['foto_file'];
+
+    if ($file['error'] !== UPLOAD_ERR_OK) {
+        $error = 'Upload gambar gagal. Silakan pilih ulang gambar.';
+        return null;
+    }
+
+    if ($file['size'] > 2 * 1024 * 1024) {
+        $error = 'Ukuran gambar maksimal 2 MB.';
+        return null;
+    }
+
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $mime = $finfo->file($file['tmp_name']);
+
+    $allowed = [
+        'image/jpeg' => 'jpg',
+        'image/png'  => 'png',
+        'image/webp' => 'webp',
+    ];
+
+    if (!isset($allowed[$mime])) {
+        $error = 'Format gambar harus JPG, PNG, atau WebP.';
+        return null;
+    }
+
+    $uploadDir = __DIR__ . DIRECTORY_SEPARATOR . 'uploads';
+
+    if (!is_dir($uploadDir) && !mkdir($uploadDir, 0755, true)) {
+        $error = 'Folder uploads tidak dapat dibuat.';
+        return null;
+    }
+
+    $filename = bin2hex(random_bytes(16)) . '.' . $allowed[$mime];
+    $destination = $uploadDir . DIRECTORY_SEPARATOR . $filename;
+
+    if (!move_uploaded_file($file['tmp_name'], $destination)) {
+        $error = 'Gambar gagal disimpan ke server.';
+        return null;
+    }
+
+    return 'uploads/' . $filename;
+}
+
+
 // Ambil kategori dari database
 $kategoriResult = $conn->query(
     "SELECT id_kategori, nama_kategori
@@ -62,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $longitude = trim($_POST['longitude'] ?? '');
     $jam_operasional = trim($_POST['jam_operasional'] ?? '');
     $harga_tiket = trim($_POST['harga_tiket'] ?? '');
-    $foto = trim($_POST['foto'] ?? '');
+    $foto = ''; // Path foto diisi otomatis dari hasil upload.
     $link_maps = trim($_POST['link_maps'] ?? '');
 
     // Validasi nama
@@ -154,6 +209,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    // Proses upload gambar setelah validasi data.
+    if ($error === '') {
+        $uploadedFoto = uploadFotoDestinasi($error);
+        if ($uploadedFoto !== null) {
+            $foto = $uploadedFoto;
+        }
+    }
+
     // Simpan data jika semua validasi lolos
     if ($error === '') {
         $kategoriId = (int) $id_kategori;
@@ -234,6 +297,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Catat error di log server tanpa membocorkan detail SQL
         error_log('Gagal menyimpan destinasi: ' . $stmt->error);
 
+        if ($foto !== '' && is_file(__DIR__ . '/' . $foto)) {
+            @unlink(__DIR__ . '/' . $foto);
+        }
         $error = 'Gagal menyimpan destinasi. Periksa konfigurasi database atau log PHP.';
         $stmt->close();
     }
@@ -303,7 +369,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <?php else: ?>
 
-                <form method="POST" action="" class="td-form">
+                <form method="POST" action="" class="td-form" enctype="multipart/form-data">
 
                     <input
                         type="hidden"
@@ -473,17 +539,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
 
                             <div class="td-field td-field-full">
-                                <label for="foto">Path Foto Destinasi</label>
+                                <label for="foto_file">Upload Foto Destinasi</label>
                                 <input
-                                    type="text"
-                                    id="foto"
-                                    name="foto"
-                                    maxlength="255"
-                                    placeholder="Contoh: uploads/pantai.jpg"
-                                    value="<?= e($foto) ?>"
+                                    type="file"
+                                    id="foto_file"
+                                    name="foto_file"
+                                    accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
                                 >
                                 <small class="td-help">
-                                    Masukkan path foto yang sudah tersedia. Fitur upload foto belum termasuk dalam form ini.
+                                    Pilih gambar JPG, PNG, atau WebP. Ukuran maksimal 2 MB.
                                 </small>
                             </div>
 

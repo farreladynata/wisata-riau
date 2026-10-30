@@ -11,6 +11,61 @@ function e($value)
     );
 }
 
+/**
+ * Upload gambar destinasi dengan validasi MIME dan ukuran.
+ * Mengembalikan path relatif (uploads/nama-file.ext) atau null jika tidak ada file.
+ */
+function uploadFotoDestinasi(string &$error): ?string
+{
+    if (!isset($_FILES['foto_file']) || $_FILES['foto_file']['error'] === UPLOAD_ERR_NO_FILE) {
+        return null;
+    }
+
+    $file = $_FILES['foto_file'];
+
+    if ($file['error'] !== UPLOAD_ERR_OK) {
+        $error = 'Upload gambar gagal. Silakan pilih ulang gambar.';
+        return null;
+    }
+
+    if ($file['size'] > 2 * 1024 * 1024) {
+        $error = 'Ukuran gambar maksimal 2 MB.';
+        return null;
+    }
+
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $mime = $finfo->file($file['tmp_name']);
+
+    $allowed = [
+        'image/jpeg' => 'jpg',
+        'image/png'  => 'png',
+        'image/webp' => 'webp',
+    ];
+
+    if (!isset($allowed[$mime])) {
+        $error = 'Format gambar harus JPG, PNG, atau WebP.';
+        return null;
+    }
+
+    $uploadDir = __DIR__ . DIRECTORY_SEPARATOR . 'uploads';
+
+    if (!is_dir($uploadDir) && !mkdir($uploadDir, 0755, true)) {
+        $error = 'Folder uploads tidak dapat dibuat.';
+        return null;
+    }
+
+    $filename = bin2hex(random_bytes(16)) . '.' . $allowed[$mime];
+    $destination = $uploadDir . DIRECTORY_SEPARATOR . $filename;
+
+    if (!move_uploaded_file($file['tmp_name'], $destination)) {
+        $error = 'Gambar gagal disimpan ke server.';
+        return null;
+    }
+
+    return 'uploads/' . $filename;
+}
+
+
 // Validasi ID destinasi
 $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 
@@ -84,7 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $longitudeInput = trim($_POST['longitude'] ?? '');
         $jam = trim($_POST['jam_operasional'] ?? '');
         $harga = trim($_POST['harga_tiket'] ?? '');
-        $foto = trim($_POST['foto'] ?? '');
+        $foto = (string) ($data['foto'] ?? ''); // Pertahankan gambar lama jika tidak ada upload baru.
         $link_maps = trim($_POST['link_maps'] ?? '');
 
         // Pertahankan input jika validasi gagal
@@ -97,7 +152,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $data['longitude'] = $longitudeInput;
         $data['jam_operasional'] = $jam;
         $data['harga_tiket'] = $harga;
-        $data['foto'] = $foto;
         $data['link_maps'] = $link_maps;
 
         $kategoriValid = false;
@@ -163,6 +217,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ) {
             $error = 'Rentang koordinat tidak valid.';
         } else {
+            $data['foto_sebelum_upload'] = (string) ($data['foto'] ?? '');
+            $uploadedFoto = uploadFotoDestinasi($error);
+            if ($uploadedFoto !== null) {
+                $foto = $uploadedFoto;
+                $data['foto'] = $foto;
+            }
+
+            if ($error === '') {
             $latitude = $latitudeInput === ''
                 ? null
                 : (float) $latitudeInput;
@@ -217,6 +279,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($stmt->execute()) {
                     $stmt->close();
 
+                    // Hapus foto lama setelah database berhasil diperbarui.
+                    $oldFoto = (string) ($data['foto_sebelum_upload'] ?? '');
+                    if (
+                        $uploadedFoto !== null &&
+                        $oldFoto !== '' &&
+                        strpos($oldFoto, 'uploads/') === 0 &&
+                        is_file(__DIR__ . '/' . $oldFoto)
+                    ) {
+                        @unlink(__DIR__ . '/' . $oldFoto);
+                    }
+
                     header('Location: destinasi.php?status=diubah');
                     exit;
                 }
@@ -224,6 +297,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 error_log('Update destinasi gagal: ' . $stmt->error);
                 $error = 'Data gagal diperbarui. Silakan coba lagi.';
                 $stmt->close();
+                }
+
+                // Hapus file baru jika update database gagal.
+                if ($error !== '' && $uploadedFoto !== null && is_file(__DIR__ . '/' . $uploadedFoto)) {
+                    @unlink(__DIR__ . '/' . $uploadedFoto);
+                }
+
             }
         }
     }
@@ -336,7 +416,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <p class="error" role="alert"><?= e($error) ?></p>
         <?php endif; ?>
 
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data">
             <input
                 type="hidden"
                 name="csrf_token"
@@ -431,14 +511,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 required
             >
 
-            <label for="foto">Path Foto (opsional)</label>
+            <label for="foto_file">Upload Foto Baru (opsional)</label>
+            <?php if (!empty($data['foto'])): ?>
+                <div style="margin: 8px 0 12px;">
+                    <img
+                        src="<?= e($data['foto']) ?>"
+                        alt="Foto destinasi saat ini"
+                        style="display:block;max-width:220px;max-height:150px;object-fit:cover;border-radius:8px;"
+                    >
+                    <small>Foto saat ini. Kosongkan pilihan file jika ingin tetap menggunakannya.</small>
+                </div>
+            <?php endif; ?>
             <input
-                id="foto"
-                name="foto"
-                maxlength="255"
-                placeholder="Contoh: uploads/pantai.jpg"
-                value="<?= e($data['foto'] ?? '') ?>"
+                id="foto_file"
+                name="foto_file"
+                type="file"
+                accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
             >
+            <small>Format JPG, PNG, atau WebP. Maksimal 2 MB.</small>
 
             <label for="link_maps">Link Lokasi Google Maps (opsional)</label>
             <input
